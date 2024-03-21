@@ -17,6 +17,7 @@ import {
 
 const INITIAL_TICK_ENTITY: TickEntity = {
   id: "INITIAL_TICK",
+  poolAddress: "EMPTY",
   tickIdx: BigInt(0),
   liquidityNet: BigInt(0),
   price0: BigInt(0),
@@ -160,6 +161,7 @@ UniswapV3PoolContract.Mint.handler(({ event, context }) => {
   const nextLowerTickEntity = {
     ...lowerTickEntity,
     id: lowerTickId,
+    poolAddress: poolAddress,
     tickIdx: lowerTickIdx,
     liquidityNet: lowerTickEntity.liquidityNet + amount,
   };
