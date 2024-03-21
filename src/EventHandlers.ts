@@ -11,6 +11,7 @@ import {
   UniswapV3Pool_MintEntity,
   UniswapV3Pool_BurnEntity,
   uniswapV3Pool_InitializeEntity,
+  uniswapV3Pool_SwapEntity,
   EventsSummaryEntity,
 } from "../generated/src/Types.gen";
 
@@ -141,4 +142,22 @@ UniswapV3PoolContract.Mint.handler(({ event, context }) => {
 
   context.EventsSummary.set(nextSummaryEntity);
   context.UniswapV3Pool_Mint.set(uniswapV3Pool_MintEntity);
+});
+
+UniswapV3PoolContract.Swap.loader(({ event, context }) => {});
+
+UniswapV3PoolContract.Swap.handler(({ event, context }) => {
+  const uniswapV3Pool_SwapEntity: uniswapV3Pool_SwapEntity = {
+    id: event.transactionHash + event.logIndex.toString(),
+    sender: event.params.sender,
+    recipient: event.params.recipient,
+    amount0: event.params.amount0,
+    amount1: event.params.amount1,
+    sqrtPriceX96: event.params.sqrtPriceX96,
+    liquidity: event.params.liquidity,
+    tick: event.params.tick,
+    eventsSummary: GLOBAL_EVENTS_SUMMARY_KEY,
+  };
+
+  context.UniswapV3Pool_Swap.set(uniswapV3Pool_SwapEntity);
 });

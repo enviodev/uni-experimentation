@@ -10,13 +10,14 @@ contracts:
       - event: Burn(address indexed owner, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount, uint256 amount0, uint256 amount1)
       - event: Initialize(uint160 sqrtPriceX96, int24 tick)
       - event: Mint(address sender, address indexed owner, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount, uint256 amount0, uint256 amount1)
+      - event: "Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)"
 networks:
   - id: 1
     start_block: 0
     contracts:
       - name: UniswapV3Factory
         address:
-          - 0x1F98431c8aD98523631AE4a59f267346ea31F984   
+          - 0x1F98431c8aD98523631AE4a59f267346ea31F984
       - name: UniswapV3Pool
         address:
           - 0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801
@@ -21313,7 +21314,7 @@ networks:
           - 0x8bac0d6e7e874fcabacc5be91aa9a0bb709f35bd
           - 0xe755bf737b392874aaefc3502407b43876bbceda
 
-                  # - 0x33128a8fC17869897dcE68Ed026d694621f6FDfD
+            # - 0x33128a8fC17869897dcE68Ed026d694621f6FDfD
     # - id: 8453
     #   start_block: 0
     #   contracts:
