@@ -243,7 +243,6 @@ UniswapV3PoolContract.Mint.handler(({ event, context }) => {
         bigInt(lowerTick?.liquidityNet?.toString()).plus(amount).toString()
       ),
     };
-    lowerTick = updatedLowerTick;
     context.Tick.set(updatedLowerTick);
   }
   if (upperTick) {
@@ -253,7 +252,6 @@ UniswapV3PoolContract.Mint.handler(({ event, context }) => {
         bigInt(upperTick?.liquidityNet?.toString()).plus(amount).toString()
       ),
     };
-    upperTick = updatedUpperTick;
     context.Tick.set(updatedUpperTick);
   }
 
