@@ -1,12 +1,16 @@
 type EventsSummary {
   id: ID!
-  uniswapV3Factory_PoolCreated: [UniswapV3Factory_PoolCreated!]! @derivedFrom(field: "eventsSummary")
+  uniswapV3Factory_PoolCreated: [UniswapV3Factory_PoolCreated!]!
+    @derivedFrom(field: "eventsSummary")
   uniswapV3Factory_PoolCreatedCount: BigInt!
-  uniswapV3Pool_Burn: [UniswapV3Pool_Burn!]! @derivedFrom(field: "eventsSummary")
+  uniswapV3Pool_Burn: [UniswapV3Pool_Burn!]!
+    @derivedFrom(field: "eventsSummary")
   uniswapV3Pool_BurnCount: BigInt!
-  uniswapV3Pool_Initialize: [UniswapV3Pool_Initialize!]! @derivedFrom(field: "eventsSummary")
+  uniswapV3Pool_Initialize: [UniswapV3Pool_Initialize!]!
+    @derivedFrom(field: "eventsSummary")
   uniswapV3Pool_InitializeCount: BigInt!
-  uniswapV3Pool_Mint: [UniswapV3Pool_Mint!]! @derivedFrom(field: "eventsSummary")
+  uniswapV3Pool_Mint: [UniswapV3Pool_Mint!]!
+    @derivedFrom(field: "eventsSummary")
   uniswapV3Pool_MintCount: BigInt!
 }
 
@@ -48,4 +52,15 @@ type UniswapV3Pool_Mint {
   amount0: BigInt!
   amount1: BigInt!
   eventsSummary: String!
+}
+
+type Tick {
+  # format: <pool address>#<tick index>
+  id: ID!
+  # pool address
+  poolAddress: String
+  # tick index
+  tickIdx: BigInt!
+  # how much liquidity changes when tick crossed
+  liquidityNet: BigInt!
 }
