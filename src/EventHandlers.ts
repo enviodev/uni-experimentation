@@ -249,7 +249,7 @@ UniswapV3PoolContract.Mint.handler(({ event, context }) => {
     const updatedUpperTick: TickEntity = {
       ...upperTick,
       liquidityNet: BigInt(
-        bigInt(upperTick?.liquidityNet?.toString()).plus(amount).toString()
+        bigInt(upperTick?.liquidityNet?.toString()).minus(amount).toString()
       ),
     };
     context.Tick.set(updatedUpperTick);
