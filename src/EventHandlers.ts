@@ -11,37 +11,23 @@ import {
   UniswapV3Pool_MintEntity,
   UniswapV3Pool_BurnEntity,
   uniswapV3Pool_InitializeEntity,
-  uniswapV3Pool_SwapEntity,
-  EventsSummaryEntity,
+  // uniswapV3Pool_SwapEntity,
+  TickEntity,
 } from "../generated/src/Types.gen";
 
-export const GLOBAL_EVENTS_SUMMARY_KEY = "GlobalEventsSummary";
-
-const INITIAL_EVENTS_SUMMARY: EventsSummaryEntity = {
-  id: GLOBAL_EVENTS_SUMMARY_KEY,
-  uniswapV3Factory_PoolCreatedCount: BigInt(0),
-  uniswapV3Pool_BurnCount: BigInt(0),
-  uniswapV3Pool_InitializeCount: BigInt(0),
-  uniswapV3Pool_MintCount: BigInt(0),
+const INITIAL_TICK_ENTITY: TickEntity = {
+  id: "INITIAL_TICK",
+  tickIdx: BigInt(0),
+  liquidityNet: BigInt(0),
+  price0: BigInt(0),
+  price1: BigInt(0),
 };
 
 UniswapV3FactoryContract.PoolCreated.loader(({ event, context }) => {
-  context.EventsSummary.load(GLOBAL_EVENTS_SUMMARY_KEY);
   context.contractRegistration.addUniswapV3Pool(event.params.pool);
 });
 
 UniswapV3FactoryContract.PoolCreated.handler(({ event, context }) => {
-  const summary = context.EventsSummary.get(GLOBAL_EVENTS_SUMMARY_KEY);
-
-  const currentSummaryEntity: EventsSummaryEntity =
-    summary ?? INITIAL_EVENTS_SUMMARY;
-
-  const nextSummaryEntity = {
-    ...currentSummaryEntity,
-    uniswapV3Factory_PoolCreatedCount:
-      currentSummaryEntity.uniswapV3Factory_PoolCreatedCount + BigInt(1),
-  };
-
   const uniswapV3Factory_PoolCreatedEntity: UniswapV3Factory_PoolCreatedEntity =
     {
       id: event.transactionHash + event.logIndex.toString(),
@@ -50,26 +36,61 @@ UniswapV3FactoryContract.PoolCreated.handler(({ event, context }) => {
       fee: event.params.fee,
       tickSpacing: event.params.tickSpacing,
       pool: event.params.pool,
-      eventsSummary: GLOBAL_EVENTS_SUMMARY_KEY,
     };
 
-  context.EventsSummary.set(nextSummaryEntity);
   context.UniswapV3Factory_PoolCreated.set(uniswapV3Factory_PoolCreatedEntity);
 });
+
 UniswapV3PoolContract.Burn.loader(({ event, context }) => {
-  context.EventsSummary.load(GLOBAL_EVENTS_SUMMARY_KEY);
+  let poolAddress = event.srcAddress.toString();
+  let lowerTickId = poolAddress + "#" + event.params.tickLower.toString();
+  let upperTickId = poolAddress + "#" + event.params.tickUpper.toString();
+
+  context.Tick.load(lowerTickId);
+  context.Tick.load(upperTickId);
 });
 
 UniswapV3PoolContract.Burn.handler(({ event, context }) => {
-  const summary = context.EventsSummary.get(GLOBAL_EVENTS_SUMMARY_KEY);
+  let lowerTickIdx = event.params.tickLower;
+  let upperTickIdx = event.params.tickUpper;
+  let amount = event.params.amount;
+  let poolAddress = event.srcAddress.toString();
 
-  const currentSummaryEntity: EventsSummaryEntity =
-    summary ?? INITIAL_EVENTS_SUMMARY;
+  let lowerTickId = poolAddress + "#" + event.params.tickLower.toString();
+  let upperTickId = poolAddress + "#" + event.params.tickUpper.toString();
 
-  const nextSummaryEntity = {
-    ...currentSummaryEntity,
-    uniswapV3Pool_BurnCount:
-      currentSummaryEntity.uniswapV3Pool_BurnCount + BigInt(1),
+  let lowerTick = context.Tick.get(lowerTickId);
+  let upperTick = context.Tick.get(upperTickId);
+
+  const lowerTickEntity: TickEntity = lowerTick ?? INITIAL_TICK_ENTITY;
+  const upperTickEntity: TickEntity = upperTick ?? INITIAL_TICK_ENTITY;
+
+  // TODO: Implement price.
+  //export let ONE_BD = BigDecimal.fromString('1')
+
+  // tick.price0 = ONE_BD;
+  // tick.price1 = ONE_BD;
+
+  // // 1.0001^tick is token1/token0.
+  // let price0 = bigDecimalExponated(
+  //   BigDecimal.fromString("1.0001"),
+  //   BigInt.fromI32(tickIdx)
+  // );
+  // tick.price0 = price0;
+  // tick.price1 = safeDiv(ONE_BD, price0);
+
+  const nextLowerTickEntity = {
+    ...lowerTickEntity,
+    id: lowerTickId,
+    tickIdx: lowerTickIdx,
+    liquidityNet: lowerTickEntity.liquidityNet - amount,
+  };
+
+  const nextUpperTickEntity = {
+    ...upperTickEntity,
+    id: upperTickId,
+    tickIdx: upperTickIdx,
+    liquidityNet: upperTickEntity.liquidityNet + amount,
   };
 
   const uniswapV3Pool_BurnEntity: UniswapV3Pool_BurnEntity = {
@@ -80,52 +101,74 @@ UniswapV3PoolContract.Burn.handler(({ event, context }) => {
     amount: event.params.amount,
     amount0: event.params.amount0,
     amount1: event.params.amount1,
-    eventsSummary: GLOBAL_EVENTS_SUMMARY_KEY,
   };
 
-  context.EventsSummary.set(nextSummaryEntity);
+  context.Tick.set(nextLowerTickEntity);
+  context.Tick.set(nextUpperTickEntity);
   context.UniswapV3Pool_Burn.set(uniswapV3Pool_BurnEntity);
 });
-UniswapV3PoolContract.Initialize.loader(({ event, context }) => {
-  context.EventsSummary.load(GLOBAL_EVENTS_SUMMARY_KEY);
-});
+UniswapV3PoolContract.Initialize.loader(({ event, context }) => {});
 
 UniswapV3PoolContract.Initialize.handler(({ event, context }) => {
-  const summary = context.EventsSummary.get(GLOBAL_EVENTS_SUMMARY_KEY);
-
-  const currentSummaryEntity: EventsSummaryEntity =
-    summary ?? INITIAL_EVENTS_SUMMARY;
-
-  const nextSummaryEntity = {
-    ...currentSummaryEntity,
-    uniswapV3Pool_InitializeCount:
-      currentSummaryEntity.uniswapV3Pool_InitializeCount + BigInt(1),
-  };
-
   const uniswapV3Pool_InitializeEntity: uniswapV3Pool_InitializeEntity = {
     id: event.transactionHash + event.logIndex.toString(),
     sqrtPriceX96: event.params.sqrtPriceX96,
     tick: event.params.tick,
-    eventsSummary: GLOBAL_EVENTS_SUMMARY_KEY,
   };
 
-  context.EventsSummary.set(nextSummaryEntity);
   context.UniswapV3Pool_Initialize.set(uniswapV3Pool_InitializeEntity);
 });
+
 UniswapV3PoolContract.Mint.loader(({ event, context }) => {
-  context.EventsSummary.load(GLOBAL_EVENTS_SUMMARY_KEY);
+  let poolAddress = event.srcAddress.toString();
+  let lowerTickId = poolAddress + "#" + event.params.tickLower.toString();
+  let upperTickId = poolAddress + "#" + event.params.tickUpper.toString();
+
+  context.Tick.load(lowerTickId);
+  context.Tick.load(upperTickId);
 });
 
 UniswapV3PoolContract.Mint.handler(({ event, context }) => {
-  const summary = context.EventsSummary.get(GLOBAL_EVENTS_SUMMARY_KEY);
+  let lowerTickIdx = event.params.tickLower;
+  let upperTickIdx = event.params.tickUpper;
+  let amount = event.params.amount;
+  let poolAddress = event.srcAddress.toString();
 
-  const currentSummaryEntity: EventsSummaryEntity =
-    summary ?? INITIAL_EVENTS_SUMMARY;
+  let lowerTickId = poolAddress + "#" + event.params.tickLower.toString();
+  let upperTickId = poolAddress + "#" + event.params.tickUpper.toString();
 
-  const nextSummaryEntity = {
-    ...currentSummaryEntity,
-    uniswapV3Pool_MintCount:
-      currentSummaryEntity.uniswapV3Pool_MintCount + BigInt(1),
+  let lowerTick = context.Tick.get(lowerTickId);
+  let upperTick = context.Tick.get(upperTickId);
+
+  const lowerTickEntity: TickEntity = lowerTick ?? INITIAL_TICK_ENTITY;
+  const upperTickEntity: TickEntity = upperTick ?? INITIAL_TICK_ENTITY;
+
+  // TODO: Implement price.
+  //export let ONE_BD = BigDecimal.fromString('1')
+
+  // tick.price0 = ONE_BD;
+  // tick.price1 = ONE_BD;
+
+  // // 1.0001^tick is token1/token0.
+  // let price0 = bigDecimalExponated(
+  //   BigDecimal.fromString("1.0001"),
+  //   BigInt.fromI32(tickIdx)
+  // );
+  // tick.price0 = price0;
+  // tick.price1 = safeDiv(ONE_BD, price0);
+
+  const nextLowerTickEntity = {
+    ...lowerTickEntity,
+    id: lowerTickId,
+    tickIdx: lowerTickIdx,
+    liquidityNet: lowerTickEntity.liquidityNet + amount,
+  };
+
+  const nextUpperTickEntity = {
+    ...upperTickEntity,
+    id: upperTickId,
+    tickIdx: upperTickIdx,
+    liquidityNet: upperTickEntity.liquidityNet - amount,
   };
 
   const uniswapV3Pool_MintEntity: UniswapV3Pool_MintEntity = {
@@ -137,27 +180,28 @@ UniswapV3PoolContract.Mint.handler(({ event, context }) => {
     amount: event.params.amount,
     amount0: event.params.amount0,
     amount1: event.params.amount1,
-    eventsSummary: GLOBAL_EVENTS_SUMMARY_KEY,
   };
 
-  context.EventsSummary.set(nextSummaryEntity);
+  context.Tick.set(nextLowerTickEntity);
+  context.Tick.set(nextUpperTickEntity);
+
   context.UniswapV3Pool_Mint.set(uniswapV3Pool_MintEntity);
 });
 
-UniswapV3PoolContract.Swap.loader(({ event, context }) => {});
+// UniswapV3PoolContract.Swap.loader(({ event, context }) => {});
 
-UniswapV3PoolContract.Swap.handler(({ event, context }) => {
-  const uniswapV3Pool_SwapEntity: uniswapV3Pool_SwapEntity = {
-    id: event.transactionHash + event.logIndex.toString(),
-    sender: event.params.sender,
-    recipient: event.params.recipient,
-    amount0: event.params.amount0,
-    amount1: event.params.amount1,
-    sqrtPriceX96: event.params.sqrtPriceX96,
-    liquidity: event.params.liquidity,
-    tick: event.params.tick,
-    eventsSummary: GLOBAL_EVENTS_SUMMARY_KEY,
-  };
+// UniswapV3PoolContract.Swap.handler(({ event, context }) => {
+//   const uniswapV3Pool_SwapEntity: uniswapV3Pool_SwapEntity = {
+//     id: event.transactionHash + event.logIndex.toString(),
+//     sender: event.params.sender,
+//     recipient: event.params.recipient,
+//     amount0: event.params.amount0,
+//     amount1: event.params.amount1,
+//     sqrtPriceX96: event.params.sqrtPriceX96,
+//     liquidity: event.params.liquidity,
+//     tick: event.params.tick,
+//     eventsSummary: GLOBAL_EVENTS_SUMMARY_KEY,
+//   };
 
-  context.UniswapV3Pool_Swap.set(uniswapV3Pool_SwapEntity);
-});
+//   context.UniswapV3Pool_Swap.set(uniswapV3Pool_SwapEntity);
+// });
