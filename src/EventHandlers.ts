@@ -20,8 +20,6 @@ const INITIAL_TICK_ENTITY: TickEntity = {
   poolAddress: "EMPTY",
   tickIdx: BigInt(0),
   liquidityNet: BigInt(0),
-  price0: BigInt(0),
-  price1: BigInt(0),
 };
 
 UniswapV3FactoryContract.PoolCreated.loader(({ event, context }) => {
