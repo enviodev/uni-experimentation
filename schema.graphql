@@ -53,8 +53,4 @@ type Tick @entity {
   tickIdx: BigInt!
   # how much liquidity changes when tick crossed
   liquidityNet: BigInt!
-  # calculated price of token0 of tick within this pool - constant
-  price0: BigInt!
-  # calculated price of token1 of tick within this pool - constant
-  price1: BigInt!
 }

@@ -20,8 +20,6 @@ const INITIAL_TICK_ENTITY: TickEntity = {
   poolAddress: "EMPTY",
   tickIdx: BigInt(0),
   liquidityNet: BigInt(0),
-  price0: BigInt(0),
-  price1: BigInt(0),
 };
 
 UniswapV3FactoryContract.PoolCreated.loader(({ event, context }) => {
@@ -66,23 +64,10 @@ UniswapV3PoolContract.Burn.handler(({ event, context }) => {
   const lowerTickEntity: TickEntity = lowerTick ?? INITIAL_TICK_ENTITY;
   const upperTickEntity: TickEntity = upperTick ?? INITIAL_TICK_ENTITY;
 
-  // TODO: Implement price.
-  //export let ONE_BD = BigDecimal.fromString('1')
-
-  // tick.price0 = ONE_BD;
-  // tick.price1 = ONE_BD;
-
-  // // 1.0001^tick is token1/token0.
-  // let price0 = bigDecimalExponated(
-  //   BigDecimal.fromString("1.0001"),
-  //   BigInt.fromI32(tickIdx)
-  // );
-  // tick.price0 = price0;
-  // tick.price1 = safeDiv(ONE_BD, price0);
-
   const nextLowerTickEntity = {
     ...lowerTickEntity,
     id: lowerTickId,
+    poolAddress: poolAddress,
     tickIdx: lowerTickIdx,
     liquidityNet: lowerTickEntity.liquidityNet - amount,
   };
@@ -90,6 +75,7 @@ UniswapV3PoolContract.Burn.handler(({ event, context }) => {
   const nextUpperTickEntity = {
     ...upperTickEntity,
     id: upperTickId,
+    poolAddress: poolAddress,
     tickIdx: upperTickIdx,
     liquidityNet: upperTickEntity.liquidityNet + amount,
   };
@@ -144,20 +130,6 @@ UniswapV3PoolContract.Mint.handler(({ event, context }) => {
   const lowerTickEntity: TickEntity = lowerTick ?? INITIAL_TICK_ENTITY;
   const upperTickEntity: TickEntity = upperTick ?? INITIAL_TICK_ENTITY;
 
-  // TODO: Implement price.
-  //export let ONE_BD = BigDecimal.fromString('1')
-
-  // tick.price0 = ONE_BD;
-  // tick.price1 = ONE_BD;
-
-  // // 1.0001^tick is token1/token0.
-  // let price0 = bigDecimalExponated(
-  //   BigDecimal.fromString("1.0001"),
-  //   BigInt.fromI32(tickIdx)
-  // );
-  // tick.price0 = price0;
-  // tick.price1 = safeDiv(ONE_BD, price0);
-
   const nextLowerTickEntity = {
     ...lowerTickEntity,
     id: lowerTickId,
@@ -169,6 +141,7 @@ UniswapV3PoolContract.Mint.handler(({ event, context }) => {
   const nextUpperTickEntity = {
     ...upperTickEntity,
     id: upperTickId,
+    poolAddress: poolAddress,
     tickIdx: upperTickIdx,
     liquidityNet: upperTickEntity.liquidityNet - amount,
   };
