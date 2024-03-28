@@ -1,4 +1,6 @@
 name: My Envio Indexer
+# event_decoder: hypersync-client
+
 contracts:
   - name: UniswapV3Factory
     handler: src/EventHandlers.ts
@@ -10,9 +12,11 @@ contracts:
       - event: Burn(address indexed owner, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount, uint256 amount0, uint256 amount1)
       - event: Initialize(uint160 sqrtPriceX96, int24 tick)
       - event: Mint(address sender, address indexed owner, int24 indexed tickLower, int24 indexed tickUpper, uint128 amount, uint256 amount0, uint256 amount1)
-      # - event: "Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)"
+      - event: "Swap(address indexed sender, address indexed recipient, int256 amount0, int256 amount1, uint160 sqrtPriceX96, uint128 liquidity, int24 tick)"
 networks:
   - id: 1
+    # hypersync_config:
+    #   url: http://eth.backup.hypersync.xyz
     start_block: 0
     contracts:
       - name: UniswapV3Factory

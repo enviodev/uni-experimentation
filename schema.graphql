@@ -34,17 +34,16 @@ type UniswapV3Pool_Mint {
   amount1: BigInt!
 }
 
-# type UniswapV3Pool_Swap {
-#   id: ID!
-#   sender: String!
-#   recipient: String!
-#   amount0: BigInt!
-#   amount1: BigInt!
-#   sqrtPriceX96: BigInt!
-#   liquidity: BigInt!
-#   tick: BigInt!
-#   eventsSummary: String!
-# }
+type UniswapV3Pool_Swap {
+  id: ID!
+  sender: String!
+  recipient: String!
+  amount0: BigInt!
+  amount1: BigInt!
+  sqrtPriceX96: BigInt!
+  liquidity: BigInt!
+  tick: BigInt!
+}
 
 type Tick @entity {
   # format: <pool address>#<tick index>
